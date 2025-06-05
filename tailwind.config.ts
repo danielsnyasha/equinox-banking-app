@@ -111,7 +111,7 @@ module.exports = {
   		},
   		backgroundImage: {
         'bank-gradient': 'linear-gradient(90deg, #2E6BFF 0%, #FF4FA3 100%)',
-        'gradient-mesh': "url('/icons/gradient-mesh.svg')",
+        'gradient-mesh': "url('/gradient-mesh.svg?v=2')",
         'bank-green-gradient': 'linear-gradient(90deg, #01797A 0%, #489399 100%)'
       },
       

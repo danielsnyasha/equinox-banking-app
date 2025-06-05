@@ -10,7 +10,11 @@ import {
   Banknote,
   Users,
   CreditCard,
-} from 'lucide-react' // <- extra icons
+  TrendingUp,
+  ShieldCheck,
+  Globe,
+  Briefcase,
+} from 'lucide-react'
 
 import {
   Sheet,
@@ -22,16 +26,19 @@ import {
 import { cn } from '@/lib/utils'
 import { sidebarLinks } from '@/constants'
 
-/* --------------------------------------------------------------
-   extra static tabs that aren’t part of sidebarLinks
-   (adds “Banking Hub”, “Cards”, “Team”, “Settings”)
------------------------------------------------------------------*/
+/* Tabs to match the Sidebar, in order */
 const extraLinks = [
-  { label: 'Banking Hub', route: '/bankeng', icon: Banknote },
-  { label: 'Cards', route: '/cards', icon: CreditCard },
-  { label: 'Team', route: '/team', icon: Users },
-  { label: 'Settings', route: '/settings', icon: Settings },
-]
+  { label: 'Banking Hub',        route: '/bankeng',    icon: Banknote },
+  { label: 'Cards',              route: '/cards',      icon: CreditCard },
+  { label: 'Team',               route: '/team',       icon: Users },
+  { label: 'Settings',           route: '/settings',   icon: Settings },
+  { label: 'Investments',        route: '/investments',icon: TrendingUp },
+  { label: 'Security Center',    route: '/security',   icon: ShieldCheck },
+  { label: 'Forex',              route: '/forex',      icon: Globe },
+  { label: 'Business Solutions', route: '/business',   icon: Briefcase },
+] as const
+
+const allLinks = [...sidebarLinks, ...extraLinks]
 
 interface MobileNavProps {
   user?: unknown
@@ -65,13 +72,12 @@ const MobileNav = ({ user }: MobileNavProps) => {
             </h1>
           </Link>
 
-          {/* ---------------- Core links ---------------- */}
+          {/* ---------------- All matching links ---------------- */}
           <nav className="flex flex-col gap-1">
-            {[...sidebarLinks, ...extraLinks].map((item) => {
+            {allLinks.map((item) => {
               const isActive =
                 pathname === item.route || pathname.startsWith(`${item.route}/`)
 
-              // icon can be string (imgURL) or component
               const Icon = (item as any).icon
 
               return (
@@ -93,7 +99,7 @@ const MobileNav = ({ user }: MobileNavProps) => {
                       )}
                     />
                   ) : (
-                    <div className="relative size-5">
+                    <div className="relative aspect-square w-5 h-5">
                       <Image
                         src={item.imgURL}
                         alt={item.label}

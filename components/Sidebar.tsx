@@ -12,8 +12,8 @@ const Sidebar = ({user}: SiderbarProps) => {
   return (
     <section className='sidebar'>
 
-        <nav className='flex flex-col gap-4'>
-            <Link href='/' className='mb-12 cursor-pointer items-center gap-2'>
+        <nav className='flex flex-col gap-5'>
+            <Link href='/' className='mb-12 cursor-pointer items-center gap-3'>
 
             <Image alt="logo" src='/logo.svg' width={34} height={34} className='size-[24px] max-xl:size-14'/>
             <h1 className='sidebar-logo'>Equinox</h1>
@@ -23,7 +23,7 @@ const Sidebar = ({user}: SiderbarProps) => {
 
           return (
             <Link href={item.route} key={item.label}
-              className={cn('sidebar-link', { 'bg-bank-gradient': isActive })}
+              className={cn('m-2 sidebar-link', { 'bg-bank-gradient': isActive })}
             >
               <div className="relative size-6">
                 <Image 
@@ -35,7 +35,7 @@ const Sidebar = ({user}: SiderbarProps) => {
                   })}
                 />
               </div>
-              <p className={cn("sidebar-label", { "!text-white": isActive })}>
+              <p className={cn("text-sm sidebar-label", { "!text-white": isActive })}>
                 {item.label}
               </p>
             </Link>

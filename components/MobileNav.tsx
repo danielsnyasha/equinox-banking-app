@@ -28,7 +28,7 @@ import { sidebarLinks } from '@/constants'
 
 /* Tabs to match the Sidebar, in order */
 const extraLinks = [
-  { label: 'Banking Hub',        route: '/bankeng',    icon: Banknote },
+  { label: 'Banking Hub',        route: '/banking-hub',    icon: Banknote },
   { label: 'Cards',              route: '/cards',      icon: CreditCard },
   { label: 'Team',               route: '/team',       icon: Users },
   { label: 'Settings',           route: '/settings',   icon: Settings },

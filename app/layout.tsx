@@ -17,8 +17,8 @@ const nunito = Nunito({
 })
 
 export const metadata: Metadata = {
-  title: "Horizon",
-  description: "Horizon is a modern banking platform for everyone.",
+  title: "Equinox",
+  description: "Equinox is a modern banking platform for everyone.",
   icons: {
     icon: './logo.svg'
   }

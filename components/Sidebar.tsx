@@ -21,14 +21,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { motion } from 'framer-motion'
 
 const extraLinks = [
-    { label: 'Banking Hub', route: '/bankeng', icon: Banknote },
+    { label: 'Banking Hub', route: '/banking-hub', icon: Banknote },
     { label: 'Cards', route: '/cards', icon: CreditCard },
     { label: 'Team', route: '/team', icon: Users },
     { label: 'Settings', route: '/settings', icon: Settings },
     { label: 'Investments', route: '/investments', icon: TrendingUp },
-    { label: 'Security Center', route: '/security', icon: ShieldCheck },
+    { label: 'Security Center', route: '/security-center', icon: ShieldCheck },
     { label: 'Forex', route: '/forex', icon: Globe },
-    { label: 'Business Solutions', route: '/business', icon: Briefcase },
+    { label: 'Business Solutions', route: '/business-solutions', icon: Briefcase },
 ] as const
 
 const allLinks = [...sidebarLinks, ...extraLinks]
@@ -102,7 +102,7 @@ const Sidebar = ({ user }: SiderbarProps) => {
                                             className={cn(
                                                 'sidebar-link group  flex transition-all',
                                                 isActive
-                                                    ? 'bg-bank-gradient text-white shadow mx-10 md:mx-10 lg:mx-10 xl:mx-0 2xl:mx-0'
+                                                    ? 'bg-bank-gradient  text-white shadow mx-10 md:mx-10 lg:mx-10 xl:mx-0 2xl:mx-0'
                                                     : 'hover:bg-gray-100',
                                                 'relative'
                                             )}
@@ -111,8 +111,8 @@ const Sidebar = ({ user }: SiderbarProps) => {
                                             {Icon ? (
                                                 <Icon
                                                     className={cn(
-                                                        'size-6 flex-shrink-0 transition-colors duration-200',
-                                                        isActive ? 'text-white' : 'text-gray-600 group-hover:text-bank-gradient'
+                                                        'size- pl-2 flex-shrink-0 transition-colors duration-200',
+                                                        isActive ? 'text-white pl-2' : 'text-gray-600 group-hover:text-bank-gradient'
                                                     )}
                                                 />
                                             ) : (

@@ -6,201 +6,193 @@ import React, { useState } from 'react';
 
 // shadcn/ui components
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormField,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 
-// react‑hook‑form & zod validation
+import { Loader2 } from 'lucide-react';
+import { format } from 'date-fns';
+
+// React-Hook-Form & Zod
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
-/* -------------------------
-   Validation Schemas & Types
---------------------------*/
-const signInSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-});
-
-const signUpSchema = z.object({
-  fullName: z.string().min(2, { message: 'Name is too short' }),
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-});
-
-type SignInFormValues = z.infer<typeof signInSchema>;
-type SignUpFormValues = z.infer<typeof signUpSchema>;
+// Utils
+import { authFormSchema } from '@/lib/utils';
+// Reusable Input
+import CustomInput from '@/components/CustomInput';
 
 type AuthType = 'sign-in' | 'sign-up' | 'link';
 
-/* -------------------------
-   Component
---------------------------*/
-const AuthForm = ({ type }: { type: AuthType }) => {
-  const [user, setUser] = useState<null | { id: string }>(null);
+export default function AuthForm({ type }: { type: AuthType }) {
+  const [user] = useState<null | { id: string }>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Forms
-  const signInForm = useForm<SignInFormValues>({
-    resolver: zodResolver(signInSchema),
+  // Schema & form setup
+  const schema = authFormSchema(type);
+  type FormValues = z.infer<typeof schema>;
+  const form = useForm<FormValues>({
+    resolver: zodResolver(schema),
     mode: 'onBlur',
   });
 
-  const signUpForm = useForm<SignUpFormValues>({
-    resolver: zodResolver(signUpSchema),
-    mode: 'onBlur',
-  });
-
-  const handleSignIn = (data: SignInFormValues) => {
-    console.log('SIGN‑IN', data);
+  const onSubmit = async (values: FormValues) => {
+    setIsLoading(true);
+    try {
+      console.log(type, values);
+      // TODO: call API
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleSignUp = (data: SignUpFormValues) => {
-    console.log('SIGN‑UP', data);
-  };
-
-  const isSignIn = !user && type === 'sign-in';
-  const isSignUp = !user && type === 'sign-up';
-  const isLinkAccount = !!user;
+  const isLink = !!user;
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden">
-      {/* Background Image */}
+      {/* Background */}
       <Image
         src="/background/bg5.jpg"
         alt="Background"
         fill
-        priority
         className="object-cover"
+        priority
       />
 
-      {/* Card */}
-      <div className="relative z-10 mx-4 w-full max-w-md rounded-xl border border-gray-300 bg-white p-8 shadow-lg sm:mx-0">
+      <div className="relative z-10 w-full max-w-md rounded-xl border border-gray-300 bg-white p-8 shadow-lg mx-4 sm:mx-0">
         {/* Header */}
-        <header className="mb-8 flex flex-col items-center">
-          <Link href="/" className="inline-flex items-center gap-3">
-            <Image src="/logo.svg" alt="logo" width={34} height={34} />
-            <h1 className="font-ibm-plex-serif text-2xl font-bold text-black-1">Equinox</h1>
+        <header className="flex flex-col items-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2">
+            <Image src="/logo.svg" alt="logo" width={32} height={32} />
+            <span className="font-ibm-plex-serif text-2xl font-bold">Equinox</span>
           </Link>
-          <h1 className="mt-6 text-center font-ibm-plex-serif text-lg font-semibold text-rose-500">
-            {isLinkAccount ? 'Link Account' : isSignIn ? 'Sign In' : 'Sign Up'}
-          </h1>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {isLinkAccount ? 'Link your account to get started' : 'Please enter your details'}
+          <h2 className="mt-4 text-center text-2xl font-semibold text-purple-800">
+            {isLink ? 'Link Account' : type === 'sign-in' ? 'Sign In' : 'Sign Up'}
+          </h2>
+          <p className="mt-1 text-center text-sm text-gray-600">
+            {isLink
+              ? 'Link your account to get started'
+              : 'Please fill in the form below'}
           </p>
         </header>
 
-        {/* LINK ACCOUNT (future) */}
-        {isLinkAccount && (
-          <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="bankName">Bank Name</Label>
-              <Input id="bankName" placeholder="e.g. Equinox Bank" disabled />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="accountNumber">Account Number</Label>
-              <Input id="accountNumber" placeholder="••••••••" disabled />
-            </div>
-            <Button type="button" disabled>
-              Link with Plaid (Coming Soon)
-            </Button>
-          </form>
+        {/* Link Account (future) */}
+        {isLink && (
+          <Form {...form}>
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+              <CustomInput control={form.control as any} name="bankName" label="Bank Name" placeholder="Equinox Bank" />
+              <CustomInput control={form.control as any} name="accountNumber" label="Account Number" placeholder="••••••••" />
+              <Button type="button" disabled className="w-full">
+                Link with Plaid (Coming Soon)
+              </Button>
+            </form>
+          </Form>
         )}
 
-        {/* SIGN‑IN FORM */}
-        {isSignIn && (
-          <form
-            className="flex flex-col gap-5"
-            onSubmit={signInForm.handleSubmit(handleSignIn)}
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...signInForm.register('email')}
-              />
-              {signInForm.formState.errors.email && (
-                <p className="text-xs text-red-600">
-                  {signInForm.formState.errors.email.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...signInForm.register('password')}
-              />
-              {signInForm.formState.errors.password && (
-                <p className="text-xs text-red-600">
-                  {signInForm.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-            <Button type="submit" disabled={signInForm.formState.isSubmitting}>
-              {signInForm.formState.isSubmitting ? 'Signing In…' : 'Sign In'}
-            </Button>
-          </form>
-        )}
+        {/* Sign In / Sign Up */}
+        {!isLink && (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {type === 'sign-up' && (
+                <>
+                  {/* Name Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <CustomInput control={form.control} name="firstName" label="First Name" placeholder="Jane" />
+                    <CustomInput control={form.control} name="lastName" label="Last Name" placeholder="Doe" />
+                  </div>
 
-        {/* SIGN‑UP FORM */}
-        {isSignUp && (
-          <form
-            className="flex flex-col gap-5"
-            onSubmit={signUpForm.handleSubmit(handleSignUp)}
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                placeholder="John Doe"
-                {...signUpForm.register('fullName')}
-              />
-              {signUpForm.formState.errors.fullName && (
-                <p className="text-xs text-red-600">
-                  {signUpForm.formState.errors.fullName.message}
-                </p>
+                  {/* Address */}
+                  <CustomInput control={form.control} name="address1" label="Address" placeholder="123 Main St" />
+
+                  {/* City & State */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <CustomInput control={form.control} name="city" label="City" placeholder="San Francisco" />
+                    <CustomInput control={form.control} name="state" label="State" placeholder="CA" />
+                  </div>
+
+                  {/* Postal & SSN */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <CustomInput control={form.control} name="postalCode" label="Postal Code" placeholder="94016" />
+                    <CustomInput control={form.control} name="ssn" label="SSN" placeholder="XXX-XX-XXXX" />
+                  </div>
+
+                  {/* Date of Birth */}
+                  <FormField
+                    control={form.control}
+                    name="dateOfBirth"
+                    render={({ field }) => (
+                      <div>
+                        <FormLabel>Date of Birth</FormLabel>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant="outline" className="w-full text-left">
+                                {field.value
+                                  ? format(field.value as Date, 'PPP')
+                                  : 'Select Date'}
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="p-0 w-auto">
+                            <Calendar
+                              mode="single"
+                              selected={field.value as unknown as Date}
+                              onSelect={field.onChange}
+                              disabled={(date) => date > new Date()}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage className="text-xs text-red-600 mt-1" />
+                      </div>
+                    )}
+                  />
+                </>
               )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...signUpForm.register('email')}
-              />
-              {signUpForm.formState.errors.email && (
-                <p className="text-xs text-red-600">
-                  {signUpForm.formState.errors.email.message}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...signUpForm.register('password')}
-              />
-              {signUpForm.formState.errors.password && (
-                <p className="text-xs text-red-600">
-                  {signUpForm.formState.errors.password.message}
-                </p>
-              )}
-            </div>
-            <Button type="submit" disabled={signUpForm.formState.isSubmitting}>
-              {signUpForm.formState.isSubmitting ? 'Creating…' : 'Create Account'}
-            </Button>
-          </form>
+
+              {/* Email & Password */}
+              <div className={type === 'sign-up' ? 'grid grid-cols-1 sm:grid-cols-2 gap-4' : ''}>
+                <CustomInput control={form.control} name="email" label="Email" placeholder="you@example.com" />
+                <CustomInput control={form.control} name="password" label="Password" placeholder="••••••••" />
+              </div>
+
+              {/* Submit */}
+              <Button type="submit" disabled={isLoading || form.formState.isSubmitting} className="w-full">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2 h-4 w-4" />Processing...
+                  </>
+                ) : type === 'sign-in' ? (
+                  'Sign In'
+                ) : (
+                  'Create Account'
+                )}
+              </Button>
+
+              {/* Footer */}
+              <div className="text-center text-sm text-gray-600">
+                {type === 'sign-in' ? (
+                  <>Don't have an account? <Link href="/sign-up" className="text-purple-800 font-medium hover:underline">Sign Up</Link></>
+                ) : (
+                  <>Already have an account? <Link href="/sign-in" className="text-purple-800 font-medium hover:underline">Sign In</Link></>
+                )}
+              </div>
+            </form>
+          </Form>
         )}
       </div>
     </div>
   );
-};
-
-export default AuthForm;
+}

@@ -1,20 +1,14 @@
 export const dynamic = 'force-dynamic'
 
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Serif, Nunito } from "next/font/google";
+import { IBM_Plex_Serif } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 const ibmPlexSerif = IBM_Plex_Serif({
   subsets: ['latin'],
   weight: ['400', '700'],
   variable: '--font-ibm-plex-serif'
-})
-const nunito = Nunito({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-nunito'
-})
+});
 
 export const metadata: Metadata = {
   title: "Equinox",
@@ -31,7 +25,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${ibmPlexSerif.variable} ${nunito.variable}`}>
+      <body
+        className={`${ibmPlexSerif.variable}`}
+        style={{
+          fontFamily: `'Segoe UI Variable', 'Segoe UI', 'Calibri', 'Source Sans 3', system-ui, Arial, sans-serif`
+        }}
+      >
         {children}
       </body>
     </html>

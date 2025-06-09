@@ -122,9 +122,18 @@ module.exports = {
   			creditCard: '8px 10px 16px 0px rgba(0, 0, 0, 0.05)'
   		},
   		fontFamily: {
-  			inter: 'var(--font-inter)',
-  			'ibm-plex-serif': 'var(--font-ibm-plex-serif)'
-  		},
+			modern: [
+			  'Source Sans 3', 
+			  'Segoe UI Variable',
+			  'Segoe UI', 
+			  'Calibri', 
+			  'system-ui',
+			  'Arial', 
+			  'sans-serif'
+			],
+			'ibm-plex-serif': ['var(--font-ibm-plex-serif)']
+		  },
+		  
   		fontSize: {
   			'10': '10px',
   			'12': '12px',

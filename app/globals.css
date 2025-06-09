@@ -476,3 +476,11 @@
     @apply bg-background text-foreground;
   }
 }
+/* globals.css */
+
+
+
+/* globals.css */
+html, body {
+  font-family: 'Segoe UI Variable', 'Segoe UI', !important;
+}

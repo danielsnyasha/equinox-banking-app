@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic'
 import type { Metadata } from "next";
 import { IBM_Plex_Serif } from "next/font/google";
 import "./globals.css";
+import { Toaster } from 'react-hot-toast';
+
 
 const ibmPlexSerif = IBM_Plex_Serif({
   subsets: ['latin'],
@@ -32,6 +34,7 @@ export default function RootLayout({
         }}
       >
         {children}
+        <Toaster/>
       </body>
     </html>
   );

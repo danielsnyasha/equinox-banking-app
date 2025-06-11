@@ -1,0 +1,199 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+/// --------------------------  USER  ---------------------------
+model User {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String   @unique                  // Appwrite auth ID
+  email             String   @unique
+  password          String
+  firstName         String
+  lastName          String
+  phoneNumber       String
+  address           String
+  city              String
+  state             String
+  postalCode        String
+  dateOfBirth       String
+  ssn               String
+  dwollaCustomerId  String
+  dwollaCustomerUrl String
+  verified          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // RELATIONS
+  banks       Bank[]        @relation("UserBanks")
+  forexTrades ForexTrade[]
+  balance     UserBalance?  @relation("UserBalance")
+  categories  CategoryCount[]
+
+  // ---------- composite or additional indexes can be added here ----------
+
+  PlaidLinkToken PlaidLinkToken[]
+}
+
+/// --------------------  BANK (Plaid Item)  --------------------
+model Bank {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  bankId           String   @unique              // Plaid Item ID
+  accessToken      String
+  fundingSourceUrl String
+  sharableId       String   @unique
+  createdAt        DateTime @default(now())
+
+  // FK → User
+  userId String @db.ObjectId
+  user   User   @relation("UserBanks", fields: [userId], references: [id])
+
+  // RELATIONS
+  accounts     Account[]
+  sentTxns     Transaction[] @relation("SenderBank")
+  receivedTxns Transaction[] @relation("ReceiverBank")
+}
+
+/// ---------------------  ACCOUNT (Plaid)  ---------------------
+model Account {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  accountId        String   @unique              // Plaid Account ID
+  appwriteItemId   String                            // denorm Bank.id
+  availableBalance Float?
+  currentBalance   Float?
+  officialName     String?
+  mask             String?
+  institutionId    String?
+  name             String
+  type             String
+  subtype          String
+  sharableId       String   @unique
+  createdAt        DateTime @default(now())
+
+  // FK → Bank
+  bankId String @db.ObjectId
+  bank   Bank   @relation(fields: [bankId], references: [id])
+
+  // RELATIONS
+  transactions Transaction[]
+}
+
+/// -----------------------  TRANSACTION  -----------------------
+model Transaction {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  paymentChannel String
+  type           String
+  amount         Float
+  pending        Boolean
+  category       String
+  date           DateTime
+  image          String?
+  channel        String?
+  createdAt      DateTime @default(now())
+
+  // FK — sender
+  senderBankId   String @db.ObjectId
+  senderBank     Bank   @relation("SenderBank", fields: [senderBankId], references: [id])
+
+  // FK — receiver
+  receiverBankId String @db.ObjectId
+  receiverBank   Bank   @relation("ReceiverBank", fields: [receiverBankId], references: [id])
+
+  // FK — account impacted
+  accountId String  @db.ObjectId
+  account   Account @relation(fields: [accountId], references: [id])
+
+  // Optional FK → ForexTrade
+  forexTradeId String?     @db.ObjectId
+  forexTrade   ForexTrade? @relation(fields: [forexTradeId], references: [id])
+}
+
+/// ---------------  USER-LEVEL BALANCE SNAPSHOT  ---------------
+model UserBalance {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  currentFiatBalance Float
+  lastRecalcAt       DateTime
+
+  // FK (1-to-1) → User
+  userId String @unique @db.ObjectId
+  user   User   @relation("UserBalance", fields: [userId], references: [id])
+}
+
+/// -----------------------  FOREX TRADE  -----------------------
+model ForexTrade {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  baseCurrency  String
+  quoteCurrency String
+  baseAmount    Float
+  rate          Float
+  status        String
+  timestamp     DateTime @default(now())
+
+  // FK → User
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+
+  // RELATION
+  legs   Transaction[]
+}
+
+/// ------------------------  LIVE RATES  -----------------------
+model ForexRate {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  baseCurrency  String
+  quoteCurrency String
+  bid           Float
+  ask           Float
+  spread        Float
+  fetchedAt     DateTime @default(now())
+
+  @@unique([baseCurrency, quoteCurrency])
+}
+
+/// -------------------  STATIC SPREAD CONFIG  ------------------
+model SpreadRate {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  baseCurrency  String
+  quoteCurrency String
+  bps           Int
+
+  @@unique([baseCurrency, quoteCurrency])
+}
+
+/// ------------------  CATEGORY COUNTS (UI)  -------------------
+model CategoryCount {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  count      Int
+  totalCount Int
+  asOfDate   DateTime
+
+  // FK → User
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+/// -------------------  PLAID LINK TOKENS  ---------------------
+model PlaidLinkToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  linkToken String
+  expiresAt DateTime
+
+  // FK → User
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+/// ---------------------  DWOLLA WEBHOOKS  ---------------------
+model DwollaWebhook {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  topic      String
+  payload    Json
+  receivedAt DateTime @default(now())
+}

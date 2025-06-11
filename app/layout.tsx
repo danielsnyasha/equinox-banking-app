@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic'
 
+import { ClerkProvider, RedirectToSignIn } from '@clerk/nextjs';
+
 import type { Metadata } from "next";
 import { IBM_Plex_Serif } from "next/font/google";
 import "./globals.css";
@@ -26,6 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    <ClerkProvider>
     <html lang="en">
       <body
         className={`${ibmPlexSerif.variable}`}
@@ -37,5 +40,6 @@ export default function RootLayout({
         <Toaster/>
       </body>
     </html>
+    </ClerkProvider>
   );
 }

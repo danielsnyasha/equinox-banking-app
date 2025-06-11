@@ -1,7 +1,7 @@
 'use server';
 
-import { ID, Query } from "node-appwrite";
-import { createAdminClient, createSessionClient } from "../appwrite";
+import { Account, ID, Query } from "node-appwrite";
+import { createAdminClient, createSessionClient, makePublicClient } from "../appwrite";
 import { cookies } from "next/headers";
 import { encryptId, extractCustomerIdFromUrl, parseStringify } from "../utils";
 import { CountryCode, ProcessorTokenCreateRequest, ProcessorTokenCreateRequestProcessorEnum, Products } from "plaid";
@@ -32,25 +32,28 @@ export const getUserInfo = async ({ userId }: getUserInfoProps) => {
   }
 }
 
+const cookieName = `a_session_${process.env.NEXT_PUBLIC_APPWRITE_PROJECT!}`;
+
 export const signIn = async ({ email, password }: signInProps) => {
   try {
-    const { account } = await createAdminClient();
-    const session = await account.createEmailPasswordSession(email, password);
+    const publicAccount = new Account(makePublicClient());
+    const session = await publicAccount.createEmailPasswordSession(email, password);
 
-    cookies().set("appwrite-session", session.secret, {
+    cookies().set(cookieName, session.secret, {
       path: "/",
       httpOnly: true,
       sameSite: "strict",
       secure: true,
     });
 
-    const user = await getUserInfo({ userId: session.userId }) 
-
+    const user = await getUserInfo({ userId: session.userId });
     return parseStringify(user);
   } catch (error) {
-    console.error('Error', error);
+    console.error("Sign-in error:", error);
+    throw error;
   }
-}
+};
+
 
 export const signUp = async ({ password, ...userData }: SignUpParams) => {
   const { email, firstName, lastName } = userData;
@@ -86,7 +89,8 @@ export const signUp = async ({ password, ...userData }: SignUpParams) => {
         ...userData,
         userId: newUserAccount.$id,
         dwollaCustomerId,
-        dwollaCustomerUrl
+        dwollaCustomerUrl,
+        verified: true 
       }
     )
 
